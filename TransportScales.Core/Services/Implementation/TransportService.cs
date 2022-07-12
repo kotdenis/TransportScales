@@ -16,12 +16,14 @@ namespace TransportScales.Core.Services.Implementation
         private readonly IMapper _mapper;
         private readonly ITransportQuantityRepository _quantityRepository;
         private readonly IValidator<TransportDto> _validator;
+        private readonly IValidator<JournalDto> _validatorJournal;
 
         public TransportService(ICacheManager cacheManager,
             ITransportRepository transportRepository,
             IJournalRepository journalRepository,
             ITransportQuantityRepository quantityRepository,
             IValidator<TransportDto> validator,
+            IValidator<JournalDto> validatorJournal,
             IMapper mapper)
         {
             _cacheManager = cacheManager;
@@ -29,6 +31,7 @@ namespace TransportScales.Core.Services.Implementation
             _journalRepository = journalRepository;
             _quantityRepository = quantityRepository;
             _validator = validator;
+            _validatorJournal = validatorJournal;
             _mapper = mapper;
         }
 
@@ -53,6 +56,9 @@ namespace TransportScales.Core.Services.Implementation
 
         public async Task<List<JournalDto>> SaveTransportWeightAsync(JournalDto journalDto, CancellationToken ct)
         {
+            ValidationResult valid = await _validatorJournal.ValidateAsync(journalDto, ct);
+            if (!valid.IsValid)
+                throw new ValidationException("The model is incorrect");
             var journal = _mapper.Map<Journal>(journalDto);
             journal.WeighinDate = DateTime.UtcNow;
             journal.Date = DateTime.UtcNow.ToShortDateString();
@@ -61,14 +67,7 @@ namespace TransportScales.Core.Services.Implementation
             var dtos = _mapper.ProjectTo<JournalDto>(journals.AsQueryable());
             var now = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, 0, 0, 0);
             List<JournalDto> result = new List<JournalDto>();
-            try
-            {
-                result = dtos.Where(x => x.WeighinDate >= now).ToList();
-            }
-            catch (Exception ex)
-            {
-                result = new List<JournalDto>();
-            }
+            result = dtos.Where(x => x.WeighinDate >= now).ToList();
             return result;
         }
 

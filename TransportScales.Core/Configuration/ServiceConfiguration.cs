@@ -15,6 +15,7 @@ namespace TransportScales.Core.Configuration
             services.AddScoped<ITransportService, TransportService>();
             services.AddScoped<IJournalService, JournalService>();
             services.AddScoped<IValidator<TransportDto>, TransportValidator>();
+            services.AddScoped<IValidator<JournalDto>, JournalValidator>();
         }
     }
 }

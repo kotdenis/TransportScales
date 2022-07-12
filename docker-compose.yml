@@ -1,25 +1,38 @@
 version: '3.4'
 
+networks:
+  dockerapi-dev:
+    driver: bridge
+
 services:
   transportscales.api:
     image: transportsc:latest
     build:
       context: .
       dockerfile: /Dockerfile
+    ports:
+      - 7057:80
+    depends_on:
+      - postgres
+    environment:
+      DB_CONNECTION_STRING: "Host=localhost;Port=5432;Database=TransportScalesDb;Username=postgres;Password=gfhfpbn0101;"
+    networks:
+      - dockerapi-dev
     
   postgres:
     image: postgres:latest
     environment:
-      - POSTGRES_USER=app
+      - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=gfhfpbn0101
       - POSTGRES_DB=TransportScalesDb
     volumes:
-      - ./volumes/data/db:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
     ports:
-       - 5432:5432
+       - "5432"
+    restart: always
+    networks:
+      - dockerapi-dev
+
+volumes:
+  pgdata:
   
-  frontend:
-    image: scales:latest
-    build:
-      context: .
-      dockerfile: /angular.Dockerfile
