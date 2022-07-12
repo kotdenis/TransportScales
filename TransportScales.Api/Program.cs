@@ -13,12 +13,15 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddCors();
-builder.Services.AddDbContext<TransportDbContext>(options =>
-{
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
-    options.EnableSensitiveDataLogging();
-}
-    );
+
+builder.Services.AddDbContext<TransportDbContext>(opt => opt.UseSqlServer(builder.Configuration.GetConnectionString("ConnectionString")));
+//builder.Services.AddDbContext<TransportDbContext>(options =>
+//{
+//    //options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+//    options.UseSqlServer(options => builder.Configuration.GetConnectionString("MSSQLConnection"));
+//    options.EnableSensitiveDataLogging();
+//}
+//);
 
 builder.Services.MakeRepositoryDependencies();
 builder.Services.MakeServiceDependencies();
